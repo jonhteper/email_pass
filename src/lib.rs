@@ -1,7 +1,7 @@
 use bcrypt::{hash, verify, BcryptError, DEFAULT_COST};
 use non_empty_string::NonEmptyString;
 use regex::Regex;
-use std::fmt::Display;
+use std::fmt::{Display, Formatter};
 use zxcvbn::ZxcvbnError;
 
 #[derive(Debug)]
@@ -32,6 +32,17 @@ impl From<ZxcvbnError> for Error {
 impl From<regex::Error> for Error {
     fn from(err: regex::Error) -> Self {
         Self::Regex(err)
+    }
+}
+
+impl Display for Error {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Error::Bcrypt(err) => write!(f, "Bcrypt Error: {err}"),
+            Error::Zxcvbn(err) => write!(f, "Zxcvbn Error: {err}"),
+            Error::Regex(err) => write!(f, "Regex Error: {err}"),
+            _ => write!(f, "{self}"),
+        }
     }
 }
 
@@ -132,7 +143,7 @@ impl Email {
 }
 
 impl Display for Email {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         Display::fmt(&self.0, f)
     }
 }

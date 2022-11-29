@@ -1,6 +1,6 @@
 [package]
 name = "email_pass"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["johnteper <git@johnteper.me>"]
 description = "Email and Password Type in Rust"
