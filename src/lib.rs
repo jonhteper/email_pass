@@ -1,5 +1,4 @@
 use bcrypt::{hash, verify, BcryptError, DEFAULT_COST};
-use non_empty_string::NonEmptyString;
 use regex::Regex;
 use std::fmt::{Display, Formatter};
 use zxcvbn::ZxcvbnError;
@@ -48,13 +47,13 @@ impl Display for Error {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Password {
-    raw: Option<NonEmptyString>,
-    encrypt: Option<NonEmptyString>,
+    raw: Option<String>,
+    encrypt: Option<String>,
 }
 
 impl Password {
     /// Create a password and encrypt this password.
-    pub fn new(raw_password: NonEmptyString) -> Result<Self, Error> {
+    pub fn new(raw_password: String) -> Result<Self, Error> {
         let mut password = Self {
             raw: Some(raw_password),
             encrypt: None,
@@ -66,7 +65,7 @@ impl Password {
     }
 
     /// Create a non encrypt password
-    pub fn from_raw(raw_password: NonEmptyString) -> Self {
+    pub fn from_raw(raw_password: String) -> Self {
         Self {
             raw: Some(raw_password),
             encrypt: None,
@@ -74,7 +73,7 @@ impl Password {
     }
 
     /// Create an encrypt password. This function not check the password's security
-    pub fn from_encrypt(encrypt_password: NonEmptyString) -> Self {
+    pub fn from_encrypt(encrypt_password: String) -> Self {
         Self {
             raw: None,
             encrypt: Some(encrypt_password),
@@ -99,7 +98,7 @@ impl Password {
             return Err(Error::UnsafePassword);
         }
         let encrypt_password = hash(raw_password, DEFAULT_COST + 1)?;
-        self.encrypt = Some(NonEmptyString::try_from(encrypt_password).unwrap());
+        self.encrypt = Some(encrypt_password);
 
         Ok(())
     }
@@ -162,10 +161,8 @@ mod tests {
 
     #[test]
     fn new_password() {
-        let unsafe_password = Password::new(NonEmptyString::try_from("01234").unwrap());
-        let safe_password = Password::new(
-            NonEmptyString::try_from("ThisIsAPassPhrase.An.Secure.Password").unwrap(),
-        );
+        let unsafe_password = Password::new("01234".to_string());
+        let safe_password = Password::new("ThisIsAPassPhrase.An.Secure.Password".to_string());
 
         assert!(unsafe_password.is_err());
         assert!(safe_password.is_ok());
