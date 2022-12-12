@@ -29,9 +29,9 @@ After initialization, you can't access the non encrypt value
     let mut password = Password::new(
         "ThisIsAPassPhrase.An.Secure.Password".to_string(),
     );
-    assert!(password.maybe_string.is_none());
+    assert_eq!(password.try_to_str(), Err(Error::InexistentEncryptPassword));
     
     password.encrypt_password().unwrap();
-    assert!(password.maybe_string.is_some());
+    assert!(password.try_to_str().is_ok());
 ```
 

@@ -121,11 +121,33 @@ impl Password {
         Ok(())
     }
 
-    /// Return stringify
+    /// Return internal value, if encrypt version exists.
     pub fn maybe_string(&self) -> Option<String> {
         self.encrypt.as_ref().map(|password| password.to_string())
     }
+
+    /// Returns a ref of the encrypt password, if exists, otherwise returns [`Error::InexistentEncryptPassword`].
+    pub fn try_to_str(&self) -> Result<&String, Error> {
+        self.encrypt.as_ref().ok_or(Error::InexistentEncryptPassword)
+    }
+
+    /// Returns the encrypt password, if exists, otherwise returns [`Error::InexistentEncryptPassword`].
+    ///
+    /// **WARNING**: this method cloned the internal value
+    pub fn try_to_string(&self) -> Result<String, Error> {
+        self.encrypt.clone().ok_or(Error::InexistentEncryptPassword)
+    }
+
 }
+
+impl TryInto<String> for Password {
+    type Error = Error;
+
+    fn try_into(self) -> Result<String, Self::Error> {
+        self.encrypt.ok_or(Error::InexistentEncryptPassword)
+    }
+}
+
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Email(String);
