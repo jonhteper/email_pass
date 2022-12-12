@@ -40,12 +40,12 @@ impl Display for Error {
             Error::Bcrypt(err) => write!(f, "Bcrypt Error: {err}"),
             Error::Zxcvbn(err) => write!(f, "Zxcvbn Error: {err}"),
             Error::Regex(err) => write!(f, "Regex Error: {err}"),
-            Error::PasswordLength => write!("Error: Password Length"),
-            Error::UnsafePassword => write!("Error: Unsafe Password"),
-            Error::InexistentEncryptPassword => write!("Error: Inexistent Encrypt Password"),
-            Error::WrongPassword => write!("Error: Wrong Password"),
-            Error::EmailFormat => write!("Error: Email Format"),
-            Error::EmailLength => write!("Error: Email Length"),
+            Error::PasswordLength => write!(f, "Error: Password Length"),
+            Error::UnsafePassword => write!(f, "Error: Unsafe Password"),
+            Error::InexistentEncryptPassword => write!(f, "Error: Inexistent Encrypt Password"),
+            Error::WrongPassword => write!(f, "Error: Wrong Password"),
+            Error::EmailFormat => write!(f, "Error: Email Format"),
+            Error::EmailLength => write!(f, "Error: Email Length"),
         }
     }
 }
