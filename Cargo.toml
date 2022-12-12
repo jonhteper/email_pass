@@ -1,13 +1,13 @@
 [package]
 name = "email_pass"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 authors = ["johnteper <git@johnteper.me>"]
 description = "Email and Password Type in Rust"
 homepage = "https://github.com/jonhteper/email_pass"
 license = "MIT"
 repository = "https://github.com/jonhteper/email_pass"
-keywords = ["email", "password", "authentication"]
+keywords = ["email", "password", "authentication", "types", "type", "credentials"]
 
 [dependencies]
 bcrypt = "0.13.0"
