@@ -15,7 +15,7 @@ Include:
 ## Safe Passwords Constructor
 
 ```rust 
-    let unsafe_password = Password::new("01234".to_string);
+    let unsafe_password = Password::new("01234".to_string());
     let safe_password = Password::new(
         "ThisIsAPassPhrase.An.Secure.Password".to_string(),
     );
@@ -24,9 +24,9 @@ Include:
     assert!(safe_password.is_ok();
 ```
 
-After initialization, you can't access the non encrypt value
+If the password is not encrypted, you can't access the inner value.
 ```rust 
-    let mut password = Password::new(
+    let mut password = Password::from_raw(
         "ThisIsAPassPhrase.An.Secure.Password".to_string(),
     );
     assert_eq!(password.try_to_str(), Err(Error::InexistentEncryptPassword));
