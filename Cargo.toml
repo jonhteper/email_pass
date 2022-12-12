@@ -7,7 +7,7 @@ description = "Email and Password Type in Rust"
 homepage = "https://github.com/jonhteper/email_pass"
 license = "MIT"
 repository = "https://github.com/jonhteper/email_pass"
-keywords = ["email", "password", "authentication", "types", "type", "credentials"]
+keywords = ["email", "password", "types", "type", "credentials"]
 
 [dependencies]
 bcrypt = "0.13.0"
