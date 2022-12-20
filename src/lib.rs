@@ -1,6 +1,7 @@
 use bcrypt::{hash, verify, BcryptError, DEFAULT_COST};
 use regex::Regex;
 use std::fmt::{Display, Formatter};
+use std::ops::Deref;
 use zxcvbn::ZxcvbnError;
 
 #[derive(Debug)]
@@ -171,6 +172,13 @@ impl Email {
 impl Display for Email {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         Display::fmt(&self.0, f)
+    }
+}
+
+impl Deref for Email {
+    type Target = String;
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
