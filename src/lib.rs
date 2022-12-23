@@ -51,6 +51,8 @@ impl Display for Error {
     }
 }
 
+impl std::errors::Error for Error {}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Password {
     raw: Option<String>,
