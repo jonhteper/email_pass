@@ -1,6 +1,6 @@
 use bcrypt::{hash, verify, BcryptError, DEFAULT_COST};
 use regex::Regex;
-use std::fmt::{Display, Formatter};
+use std::fmt::{Debug, Display, Formatter};
 use std::ops::Deref;
 use zxcvbn::ZxcvbnError;
 
@@ -53,7 +53,7 @@ impl Display for Error {
 
 impl std::error::Error for Error {}
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct Password {
     raw: Option<String>,
     encrypt: Option<String>,
@@ -151,6 +151,13 @@ impl TryInto<String> for Password {
     }
 }
 
+impl Debug for Password {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let value = self.encrypt.clone().unwrap_or_default();
+        write!(f, "Password(\"{value}\")")
+    }
+}
+
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Email(String);
@@ -189,7 +196,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn new_email() {
+    fn email_constructor_works() {
         let correct_email = Email::new("example@example.com");
         let incorrect_email = Email::new("example.com");
         assert!(correct_email.is_ok());
@@ -197,11 +204,19 @@ mod tests {
     }
 
     #[test]
-    fn new_password() {
+    fn password_constructor_works() {
         let unsafe_password = Password::new("01234".to_string());
         let safe_password = Password::new("ThisIsAPassPhrase.An.Secure.Password".to_string());
 
         assert!(unsafe_password.is_err());
         assert!(safe_password.is_ok());
     }
+
+    #[test]
+    fn password_safe_debug_works() {
+        let safe_password = Password::from_raw("ThisIsAPassPhrase.An.Secure.Password".to_string());
+        let str_password = format!("{:?}", &safe_password);
+        assert!(!str_password.contains("ThisIs"))
+    }
+
 }
