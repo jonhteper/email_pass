@@ -38,9 +38,9 @@ impl From<regex::Error> for Error {
 impl Display for Error {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            Error::Bcrypt(err) => write!(f, "Bcrypt Error: {err}"),
-            Error::Zxcvbn(err) => write!(f, "Zxcvbn Error: {err}"),
-            Error::Regex(err) => write!(f, "Regex Error: {err}"),
+            Error::Bcrypt(err) => Display::fmt(err, f),
+            Error::Zxcvbn(err) => Display::fmt(err, f),
+            Error::Regex(err) => Display::fmt(err, f),
             Error::PasswordLength => write!(f, "Error: Password Length"),
             Error::UnsafePassword => write!(f, "Error: Unsafe Password"),
             Error::InexistentEncryptPassword => write!(f, "Error: Inexistent Encrypt Password"),
@@ -131,7 +131,9 @@ impl Password {
 
     /// Returns a ref of the encrypt password, if exists, otherwise returns [`Error::InexistentEncryptPassword`].
     pub fn try_to_str(&self) -> Result<&String, Error> {
-        self.encrypt.as_ref().ok_or(Error::InexistentEncryptPassword)
+        self.encrypt
+            .as_ref()
+            .ok_or(Error::InexistentEncryptPassword)
     }
 
     /// Returns the encrypt password, if exists, otherwise returns [`Error::InexistentEncryptPassword`].
@@ -140,7 +142,6 @@ impl Password {
     pub fn try_to_string(&self) -> Result<String, Error> {
         self.encrypt.clone().ok_or(Error::InexistentEncryptPassword)
     }
-
 }
 
 impl TryInto<String> for Password {
@@ -157,7 +158,6 @@ impl Debug for Password {
         write!(f, "Password(\"{value}\")")
     }
 }
-
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Email(String);
@@ -218,5 +218,4 @@ mod tests {
         let str_password = format!("{:?}", &safe_password);
         assert!(!str_password.contains("ThisIs"))
     }
-
 }
