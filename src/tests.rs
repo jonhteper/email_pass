@@ -1,4 +1,7 @@
 use super::*;
+use crate::errors::Error;
+use crate::password::safe::Password;
+use crate::password::{legacy, safe};
 const SECURE_PASSWORD_VALUE: &str = "ThisIsAPassPhrase.And.Secure.Password";
 
 #[test]
@@ -11,8 +14,8 @@ fn email_constructor_works() {
 
 #[test]
 fn password_constructor_works() {
-    let unsafe_password = Password::new("01234".to_string());
-    let safe_password = Password::new(SECURE_PASSWORD_VALUE.to_string());
+    let unsafe_password = legacy::Password::new("01234".to_string());
+    let safe_password = legacy::Password::new(SECURE_PASSWORD_VALUE.to_string());
 
     assert!(unsafe_password.is_err());
     assert!(safe_password.is_ok());
@@ -20,28 +23,24 @@ fn password_constructor_works() {
 
 #[test]
 fn password_safe_debug_works() {
-    let safe_password = Password::from_raw(SECURE_PASSWORD_VALUE.to_string());
+    let safe_password = legacy::Password::from_raw(SECURE_PASSWORD_VALUE.to_string());
     let str_password = format!("{:?}", &safe_password);
     assert!(!str_password.contains("ThisIs"))
 }
 
-#[cfg(feature = "compiletime")]
 #[test]
-fn aot_password_works() -> Result<(), Error> {
-    let encrypt_password = password::Password::new(SECURE_PASSWORD_VALUE)
-        .check()?
-        .to_encrypt()?;
+fn safe_password_works() -> Result<(), Error> {
+    let encrypt_password = Password::new(SECURE_PASSWORD_VALUE).check()?.to_encrypt()?;
 
-    let password = password::Password::from_encrypt(&encrypt_password);
+    let password = Password::from_encrypt(&encrypt_password);
     assert!(password.is_ok());
     println!("{}", password.unwrap());
 
     Ok(())
 }
 
-#[cfg(feature = "compiletime")]
 #[test]
-fn safe_constructor_works() {
-    let password = password::Password::from_encrypt(SECURE_PASSWORD_VALUE);
+fn safe_password_constructor_works() {
+    let password = Password::from_encrypt(SECURE_PASSWORD_VALUE);
     assert!(password.is_err())
 }
