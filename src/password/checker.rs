@@ -8,22 +8,22 @@ pub enum PasswordStrong {
     /// Equals to [`zxcvbn::Entropy::score`] = 3
     Default,
     /// Equals to [`zxcvbn::Entropy::score`] = 4
-    Hard
+    Hard,
 }
 
 impl PasswordStrong {
-    pub fn as_u8(&self)-> u8 {
+    pub fn as_u8(&self) -> u8 {
         match self {
             PasswordStrong::Low => 2,
             PasswordStrong::Default => 3,
-            PasswordStrong::Hard => 4
+            PasswordStrong::Hard => 4,
         }
     }
 }
 
 /// Simplify the raw passwords checking, based in minimum length and explicit strong.
 /// Use the crate [`zxcvbn`] to estimate the strong based in entropy.
-#[derive(Copy,Clone)]
+#[derive(Copy, Clone)]
 pub struct PasswordStrongChecker {
     min_len: usize,
     /// Corresponds to [`zxcvbn::Entropy::score`]
@@ -39,7 +39,7 @@ impl PasswordStrongChecker {
     }
 
     pub fn min_len(mut self, min_len: usize) -> Self {
-        self.min_len  = min_len;
+        self.min_len = min_len;
         self
     }
 
@@ -68,5 +68,3 @@ impl Default for PasswordStrongChecker {
         Self::new()
     }
 }
-
-

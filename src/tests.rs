@@ -1,7 +1,7 @@
 use super::*;
 use crate::errors::Error;
-use crate::password::safe::Password;
 use crate::password::legacy;
+use crate::password::safe::Password;
 const SECURE_PASSWORD_VALUE: &str = "ThisIsAPassPhrase.And.Secure.Password";
 
 #[test]

@@ -1,15 +1,16 @@
 use crate::errors::Error;
+use crate::password::checker::PasswordStrongChecker;
 use bcrypt::{hash, DEFAULT_COST};
 use regex::Regex;
 use std::fmt::{Debug, Display, Formatter};
 use std::marker::PhantomData;
 use std::ops::Deref;
-use crate::password::checker::PasswordStrongChecker;
 
-pub const HASHED_PASSWORD_REGEX_VALUE:&str = r"^\$([a-z\d]+)\$([a-z\d]+)\$.*";
+pub const HASHED_PASSWORD_REGEX_VALUE: &str = r"^\$([a-z\d]+)\$([a-z\d]+)\$.*";
 pub struct Raw;
 pub struct Encrypt;
 
+/// Safe-access password abstraction.
 #[derive(Clone, Eq, PartialEq)]
 pub struct Password<State = Encrypt> {
     value: String,
@@ -24,10 +25,12 @@ impl Password {
         }
     }
 
+    /// Create a non encrypt password.
     pub fn from_raw(raw_password: &str) -> Password<Raw> {
         Self::new(raw_password)
     }
 
+    /// Create an encrypt password, check if password is really hashed.
     pub fn from_encrypt(encrypted_password: &str) -> Result<Password<Encrypt>, Error> {
         let password_regex = Regex::new(HASHED_PASSWORD_REGEX_VALUE)?;
         if !password_regex.is_match(encrypted_password) {
@@ -38,10 +41,6 @@ impl Password {
             value: encrypted_password.to_owned(),
             state: PhantomData,
         })
-    }
-
-    fn encrypt_password(raw_password: &str) -> Result<String, Error> {
-        Ok(hash(raw_password, DEFAULT_COST + 1)?)
     }
 }
 
@@ -87,7 +86,7 @@ impl Password<Raw> {
     /// Transforms [`Password<Raw>`] to [`Password<Encrypt>`], just encrypting the inner value.
     /// This method not checks the password's strong.
     pub fn to_encrypt(self) -> Result<Password<Encrypt>, Error> {
-        let encrypt_password = Password::encrypt_password(&self.value)?;
+        let encrypt_password = hash(&self.value, DEFAULT_COST + 1)?;
         Ok(Password {
             value: encrypt_password,
             state: PhantomData,
