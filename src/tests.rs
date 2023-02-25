@@ -1,7 +1,7 @@
 use super::*;
 use crate::errors::Error;
 use crate::password::safe::Password;
-use crate::password::{legacy, safe};
+use crate::password::legacy;
 const SECURE_PASSWORD_VALUE: &str = "ThisIsAPassPhrase.And.Secure.Password";
 
 #[test]
@@ -13,7 +13,7 @@ fn email_constructor_works() {
 }
 
 #[test]
-fn password_constructor_works() {
+fn legacy_password_constructor_works() {
     let unsafe_password = legacy::Password::new("01234".to_string());
     let safe_password = legacy::Password::new(SECURE_PASSWORD_VALUE.to_string());
 
@@ -22,7 +22,7 @@ fn password_constructor_works() {
 }
 
 #[test]
-fn password_safe_debug_works() {
+fn legacy_password_safe_debug_works() {
     let safe_password = legacy::Password::from_raw(SECURE_PASSWORD_VALUE.to_string());
     let str_password = format!("{:?}", &safe_password);
     assert!(!str_password.contains("ThisIs"))

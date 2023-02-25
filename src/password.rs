@@ -1,5 +1,6 @@
 pub mod legacy;
 pub mod safe;
+pub mod checker;
 
 #[cfg(feature = "legacy")]
 pub use legacy::Password;

@@ -4,7 +4,9 @@ use regex::Regex;
 use std::fmt::{Debug, Display, Formatter};
 use std::marker::PhantomData;
 use std::ops::Deref;
+use crate::password::checker::PasswordStrongChecker;
 
+pub const HASHED_PASSWORD_REGEX_VALUE:&str = r"^\$([a-z\d]+)\$([a-z\d]+)\$.*";
 pub struct Raw;
 pub struct Encrypt;
 
@@ -27,7 +29,7 @@ impl Password {
     }
 
     pub fn from_encrypt(encrypted_password: &str) -> Result<Password<Encrypt>, Error> {
-        let password_regex = Regex::new(r"^\$([a-z\d]+)\$([a-z\d]+)\$.*")?;
+        let password_regex = Regex::new(HASHED_PASSWORD_REGEX_VALUE)?;
         if !password_regex.is_match(encrypted_password) {
             return Err(Error::InexistentEncryptPassword);
         }
@@ -38,27 +40,47 @@ impl Password {
         })
     }
 
-    fn check_password(raw_password: &str) -> Result<(), Error> {
-        if raw_password.len() < 8 {
-            return Err(Error::PasswordLength);
-        }
-
-        let estimate = zxcvbn::zxcvbn(raw_password, &[])?;
-        if estimate.score() < 4 {
-            return Err(Error::UnsafePassword);
-        }
-
-        Ok(())
-    }
-
     fn encrypt_password(raw_password: &str) -> Result<String, Error> {
         Ok(hash(raw_password, DEFAULT_COST + 1)?)
     }
 }
 
 impl Password<Raw> {
+    /// Check the password's strong, use [`PasswordStrongChecker`] with default values.
+    /// If you want change this values, use [`Password<Raw>::custom_check`].
     pub fn check(self) -> Result<Self, Error> {
-        Password::check_password(&self.value)?;
+        PasswordStrongChecker::new().check(&self.value)?;
+        Ok(self)
+    }
+
+    /// Check the password's strong
+    /// # Examples
+    /// Hard strong password example:
+    ///```
+    /// use email_pass::Password;
+    /// use email_pass::password::checker::{PasswordStrongChecker, PasswordStrong};
+    ///
+    /// let checker = PasswordStrongChecker::new()
+    ///         .min_len(20)
+    ///         .strong(PasswordStrong::Hard);
+    ///
+    /// let password_err = Password::new("my.passphrase.0-9").custom_check(checker);
+    /// assert!(password_err.is_err());
+    /// ```
+    /// Low strong password example:
+    ///```
+    /// use email_pass::Password;
+    /// use email_pass::password::checker::{PasswordStrongChecker, PasswordStrong};
+    ///
+    /// let checker = PasswordStrongChecker::new()
+    ///         .min_len(8)
+    ///         .strong(PasswordStrong::Low);
+    ///
+    /// let raw_password = Password::new("1234567azhc").custom_check(checker);
+    /// assert!(raw_password.is_ok());
+    /// ```
+    pub fn custom_check(self, checker: PasswordStrongChecker) -> Result<Self, Error> {
+        checker.check(&self.value)?;
         Ok(self)
     }
 
