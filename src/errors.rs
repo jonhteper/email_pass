@@ -39,12 +39,12 @@ impl Display for Error {
             Error::Bcrypt(err) => Display::fmt(err, f),
             Error::Zxcvbn(err) => Display::fmt(err, f),
             Error::Regex(err) => Display::fmt(err, f),
-            Error::PasswordLength => write!(f, "Error: Password Length"),
-            Error::UnsafePassword => write!(f, "Error: Unsafe Password"),
-            Error::InexistentEncryptPassword => write!(f, "Error: Inexistent Encrypt Password"),
-            Error::WrongPassword => write!(f, "Error: Wrong Password"),
-            Error::EmailFormat => write!(f, "Error: Email Format"),
-            Error::EmailLength => write!(f, "Error: Email Length"),
+            Error::PasswordLength => write!(f, "error: password length"),
+            Error::UnsafePassword => write!(f, "error: unsafe password"),
+            Error::InexistentEncryptPassword => write!(f, "error: inexistent encrypt password"),
+            Error::WrongPassword => write!(f, "error: wrong password"),
+            Error::EmailFormat => write!(f, "error: email format"),
+            Error::EmailLength => write!(f, "error: email length"),
         }
     }
 }
