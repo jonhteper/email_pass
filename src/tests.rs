@@ -1,7 +1,9 @@
+#![allow(unused)]
+
 use super::*;
 use crate::errors::Error;
 use crate::password::legacy;
-use crate::password::safe::Password;
+use crate::password::safe::{Password, Encrypt};
 const SECURE_PASSWORD_VALUE: &str = "ThisIsAPassPhrase.And.Secure.Password";
 
 #[test]
@@ -43,4 +45,40 @@ fn safe_password_works() -> Result<(), Error> {
 fn safe_password_constructor_works() {
     let password = Password::from_encrypt(SECURE_PASSWORD_VALUE);
     assert!(password.is_err())
+}
+
+
+fn create_password(password: &str) -> Password {
+    Password::new("my.new.password.1")
+        .check()
+        .expect("unsafe password")
+        .to_encrypt()
+        .expect("error encripting password")
+}
+
+#[derive(Debug, Clone)]
+struct User<'a> {
+    id: &'a str,
+    password: Password<Encrypt>,
+}
+
+impl<'a> User<'a> {
+    pub fn new(id: &'a str, password: Password) -> Self {
+        Self { id, password}
+    }
+
+    pub fn change_password(&mut self, password: &str) {
+        let new_password = create_password(password);
+        self.password = new_password;
+    }
+}
+
+#[test]
+fn password_in_struct() {
+    let id = "id.user.example";
+    let password = create_password("my.new.password.1");
+    let mut user = User::new(id, password);
+    user.change_password(SECURE_PASSWORD_VALUE);
+
+    println!("{:?}", user);
 }

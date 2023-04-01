@@ -7,7 +7,10 @@ use std::marker::PhantomData;
 use std::ops::Deref;
 
 pub const HASHED_PASSWORD_REGEX_VALUE: &str = r"^\$([a-z\d]+)\$([a-z\d]+)\$.*";
+
+#[derive(Clone)]
 pub struct Raw;
+#[derive(Clone)]
 pub struct Encrypt;
 
 /// Safe-access password abstraction.
