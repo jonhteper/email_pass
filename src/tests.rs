@@ -3,7 +3,7 @@
 use super::*;
 use crate::errors::Error;
 use crate::password::legacy;
-use crate::password::safe::{Password, Encrypt};
+use crate::password::safe::{Encrypt, Password};
 const SECURE_PASSWORD_VALUE: &str = "ThisIsAPassPhrase.And.Secure.Password";
 
 #[test]
@@ -47,7 +47,6 @@ fn safe_password_constructor_works() {
     assert!(password.is_err())
 }
 
-
 fn create_password(password: &str) -> Password {
     Password::new("my.new.password.1")
         .check()
@@ -64,7 +63,7 @@ struct User<'a> {
 
 impl<'a> User<'a> {
     pub fn new(id: &'a str, password: Password) -> Self {
-        Self { id, password}
+        Self { id, password }
     }
 
     pub fn change_password(&mut self, password: &str) {
