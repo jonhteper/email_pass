@@ -1,5 +1,7 @@
 #![allow(unused)]
 
+use bcrypt::DEFAULT_COST;
+
 use super::*;
 use crate::errors::Error;
 use crate::password::legacy;
@@ -32,7 +34,9 @@ fn legacy_password_safe_debug_works() {
 
 #[test]
 fn safe_password_works() -> Result<(), Error> {
-    let encrypt_password = Password::new(SECURE_PASSWORD_VALUE).check()?.to_encrypt()?;
+    let encrypt_password = Password::new(SECURE_PASSWORD_VALUE)
+        .check()?
+        .to_encrypt(DEFAULT_COST)?;
 
     let password = Password::from_encrypt(&encrypt_password);
     assert!(password.is_ok());
@@ -51,7 +55,7 @@ fn create_password(password: &str) -> Password {
     Password::new("my.new.password.1")
         .check()
         .expect("unsafe password")
-        .to_encrypt()
+        .to_encrypt(DEFAULT_COST)
         .expect("error encripting password")
 }
 
@@ -80,4 +84,16 @@ fn password_in_struct() {
     user.change_password(SECURE_PASSWORD_VALUE);
 
     println!("{:?}", user);
+}
+
+#[test]
+fn password_hash_works() {
+    let raw_password = Password::from_raw(SECURE_PASSWORD_VALUE);
+    let encrypt_password = raw_password
+        .clone()
+        .check()
+        .unwrap()
+        .to_encrypt(DEFAULT_COST)
+        .unwrap();
+    assert!(encrypt_password.verify(&raw_password).unwrap())
 }

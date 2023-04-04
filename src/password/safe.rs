@@ -1,6 +1,6 @@
 use crate::errors::Error;
 use crate::password::checker::PasswordStrongChecker;
-use bcrypt::{hash, DEFAULT_COST};
+use bcrypt::{hash, verify};
 use regex::Regex;
 use std::fmt::{Debug, Display, Formatter};
 use std::marker::PhantomData;
@@ -45,6 +45,10 @@ impl Password {
             state: PhantomData,
         })
     }
+
+    pub fn verify(&self, raw_password: &Password<Raw>) -> Result<bool, Error> {
+        Ok(verify(&raw_password.value, &self.value)?)
+    }
 }
 
 impl Password<Raw> {
@@ -88,8 +92,8 @@ impl Password<Raw> {
 
     /// Transforms [`Password<Raw>`] to [`Password<Encrypt>`], just encrypting the inner value.
     /// This method not checks the password's strong.
-    pub fn to_encrypt(self) -> Result<Password<Encrypt>, Error> {
-        let encrypt_password = hash(&self.value, DEFAULT_COST + 1)?;
+    pub fn to_encrypt(self, cost: u32) -> Result<Password<Encrypt>, Error> {
+        let encrypt_password = hash(self.value, cost)?;
         Ok(Password {
             value: encrypt_password,
             state: PhantomData,
