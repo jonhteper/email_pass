@@ -10,7 +10,7 @@ impl Serialize for Email {
     where
         S: serde::Serializer,
     {
-        serializer.serialize_str(&self)
+        serializer.serialize_str(self)
     }
 }
 
@@ -61,7 +61,7 @@ pub mod safe_password {
         where
             S: serde::Serializer,
         {
-            serializer.serialize_str(&self)
+            serializer.serialize_str(self)
         }
     }
 
