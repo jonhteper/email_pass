@@ -8,9 +8,9 @@ use std::ops::Deref;
 
 pub const HASHED_PASSWORD_REGEX_VALUE: &str = r"^\$([a-z\d]+)\$([a-z\d]+)\$.*";
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct Raw;
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct Encrypt;
 
 /// Safe-access password abstraction.
