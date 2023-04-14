@@ -1,5 +1,8 @@
 # email_pass
-Email and Password Type in Rust
+
+[![Crates.io](https://shields.io/crates/v/email_pass.svg)](https://crates.io/crates/email_pass)
+
+`Email` and `Password` types in Rust.
 
 ## Safe Email Constructor
 
@@ -11,20 +14,21 @@ fn main() {
     assert!(correct_email.is_ok());
     assert!(incorrect_email.is_err());
 }
- ```
+```
 
-### Safe Password Type
-The type `Password` differentiates the raw password from encrypted passwords 
-and provides only the correct methods for each. 
+## Safe Password Type
+
+The type `Password` differentiates the raw password from encrypted passwords and provides only the correct methods for each. 
+
 ```rust
 use email_pass::Password;
 fn main() -> Result<(), Error> {
-    let encrypt_password = password::Password::new("ThisIsAPassPhrase.And.Secure.Password")
+    let encrypt_password = Password::new("ThisIsAPassPhrase.And.Secure.Password")
         .check()? // raw password method
         .to_encrypt()?; // raw password method
     
     // encrypted passwords implements the Deref trait
-    let password = password::Password::from_encrypt(&encrypt_password)?;
+    let password = Password::from_encrypt(&encrypt_password)?;
     
     println!("{}", password);
 
@@ -35,7 +39,7 @@ The next code don't compile, because the raw passwords do not implement either t
 ```rust
 use email_pass::Password;
 fn main() {
-    let password = password::Password::new("ThisIsAPassPhrase.And.Secure.Password");
+    let password = Password::new("ThisIsAPassPhrase.And.Secure.Password");
     println!("{}", &password); // ❌
     println!("{:?}", &password); // ❌ 
 }
@@ -78,18 +82,30 @@ fn main(){
 }
 ```
 
-### Migration from v0.4.1 to v0.5.0
-If you don't want break your code, just use the featue `legacy`:
+## Serde Suport
+
+The types `Email` and `Password` implements the traits `Serialize` and `Deserialize` in the feature `serde`. 
+
 ```toml
 [dependencies]
-email_pass = { version = "0.5.0", features = ["legacy"] }
+email_pass = { version = "0.7.0", features = ["serde"] }
+```
+
+
+
+## Migration from version 0.4.1 to version 0.5.0+
+
+If you don't want break your code, just use the feature `legacy`:
+```toml
+[dependencies]
+email_pass = { version = "0.7.0", features = ["legacy"] }
 ```
 Then, you can try the new Password type with the import:
 ```rust
 use email_pass::password::safe::Password;
 ```
 
+## Acknowledgments
 
-### Acknowledgments
 Thanks to [letsgetrusty](https://github.com/letsgetrusty/) for the 
 [repo that inspired](https://github.com/letsgetrusty/generics_and_zero_sized_types) the `Password` type.
