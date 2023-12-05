@@ -1,52 +1,52 @@
-use bcrypt::BcryptError;
-use std::fmt::{Debug, Display, Formatter};
+use std::fmt::Debug;
+use thiserror::Error;
 use zxcvbn::ZxcvbnError;
 
-#[derive(Debug)]
-pub enum Error {
-    PasswordLength,
-    UnsafePassword,
-    Bcrypt(BcryptError),
-    Zxcvbn(ZxcvbnError),
-    Regex(regex::Error),
-    InexistentEncryptPassword,
-    WrongPassword,
-    EmailFormat,
-    EmailLength,
+use crate::password::checker::PasswordStrength;
+
+#[derive(Debug, Copy, Clone, Error, PartialEq, Eq)]
+pub enum EmailError {
+    #[error("invalid email format")]
+    InvalidFormat,
+
+    #[error("invalid email length, use a value between 6 and 254 characters")]
+    InvalidLength,
+
+    #[error("invalid email domain format")]
+    InvalidDomain,
+
+    #[error("invalid email username format")]
+    InvalidUsername,
 }
 
-impl From<BcryptError> for Error {
-    fn from(err: BcryptError) -> Self {
-        Self::Bcrypt(err)
-    }
+#[derive(Debug, Error, PartialEq, Eq)]
+pub enum PasswordError {
+    #[error("invalid password length, use a value with at least {0} characters")]
+    InvalidLength(u8),
+
+    #[error("a blank password is an invalid password")]
+    BlankPassword,
+
+    /// Replace of [`ZxcvbnError::DurationOutOfRange`].
+    ///
+    /// `Zxcvbn` calculate the duration since the Unix epoch to calculate
+    /// the time it took to guess the password. If the calculation fails,
+    /// return the error [`ZxcvbnError::DurationOutOfRange`].
+    #[error("error calculating password entropy")]
+    PasswordEntropy,
+
+    #[error("the password is not strong enough, expected password with {0} strength")]
+    UnsafePassword(PasswordStrength),
+
+    #[error("the password provided is not encrypted")]
+    PasswordNotEncrypted,
 }
 
-impl From<ZxcvbnError> for Error {
+impl From<ZxcvbnError> for PasswordError {
     fn from(err: ZxcvbnError) -> Self {
-        Self::Zxcvbn(err)
-    }
-}
-
-impl From<regex::Error> for Error {
-    fn from(err: regex::Error) -> Self {
-        Self::Regex(err)
-    }
-}
-
-impl Display for Error {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Error::Bcrypt(err) => Display::fmt(err, f),
-            Error::Zxcvbn(err) => Display::fmt(err, f),
-            Error::Regex(err) => Display::fmt(err, f),
-            Error::PasswordLength => write!(f, "error: password length"),
-            Error::UnsafePassword => write!(f, "error: unsafe password"),
-            Error::InexistentEncryptPassword => write!(f, "error: inexistent encrypt password"),
-            Error::WrongPassword => write!(f, "error: wrong password"),
-            Error::EmailFormat => write!(f, "error: email format"),
-            Error::EmailLength => write!(f, "error: email length"),
+        match err {
+            ZxcvbnError::BlankPassword => Self::BlankPassword,
+            ZxcvbnError::DurationOutOfRange => Self::PasswordEntropy,
         }
     }
 }
-
-impl std::error::Error for Error {}
