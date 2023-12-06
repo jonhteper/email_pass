@@ -1,12 +1,17 @@
-pub mod email;
-pub mod errors;
-pub mod password;
+mod errors;
 
-#[cfg(feature = "serde")]
-pub mod serde_feature;
+#[cfg(feature = "legacy")]
+mod legacy;
 
-#[cfg(test)]
-mod tests;
+#[cfg(not(feature = "legacy"))]
+mod typed;
 
-pub use email::Email;
-pub use password::Password;
+#[cfg(feature = "legacy")]
+pub use legacy::{email::Email, password::Password};
+
+#[cfg(not(feature = "legacy"))]
+pub use typed::{
+    email::Email,
+    password::{Encrypt, Password, Raw},
+    password_checker::{PasswordStrength, PasswordStrengthChecker},
+};

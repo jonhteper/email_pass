@@ -2,21 +2,22 @@ use std::fmt::Debug;
 use thiserror::Error;
 use zxcvbn::ZxcvbnError;
 
-use crate::password::checker::PasswordStrength;
+#[cfg(not(feature = "legacy"))]
+use crate::typed::password_checker::PasswordStrength;
 
 #[derive(Debug, Copy, Clone, Error, PartialEq, Eq)]
 pub enum EmailError {
     #[error("invalid email format")]
-    InvalidFormat,
+    Format,
 
     #[error("invalid email length, use a value between 6 and 254 characters")]
-    InvalidLength,
+    Length,
 
     #[error("invalid email domain format")]
-    InvalidDomain,
+    Domain,
 
     #[error("invalid email username format")]
-    InvalidUsername,
+    Username,
 }
 
 #[derive(Debug, Error, PartialEq, Eq)]
@@ -35,11 +36,28 @@ pub enum PasswordError {
     #[error("error calculating password entropy")]
     PasswordEntropy,
 
+    #[cfg(not(feature = "legacy"))]
     #[error("the password is not strong enough, expected password with {0} strength")]
     UnsafePassword(PasswordStrength),
 
+    #[cfg(feature = "legacy")]
+    #[error("the password is not strong enough")]
+    NotEnoughStrongPassword,
+
     #[error("the password provided is not encrypted")]
     PasswordNotEncrypted,
+
+    #[cfg(feature = "legacy")]
+    #[error("error encrypting password")]
+    PasswordEncryption,
+
+    #[cfg(feature = "legacy")]
+    #[error("error during verification procress")]
+    PasswordVerification,
+
+    #[cfg(feature = "legacy")]
+    #[error("the raw password don't match with encrypted")]
+    WrongPassword,
 }
 
 impl From<ZxcvbnError> for PasswordError {

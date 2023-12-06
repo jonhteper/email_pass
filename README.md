@@ -4,19 +4,23 @@
 
 `Email` and `Password` types in Rust.
 
-## Safe Email Constructor
+## Email data type
 
 ```rust
 use email_pass::Email;
 fn main() {
-    let correct_email = Email::new("example@example.com");
-    let incorrect_email = Email::new("example.com");
-    assert!(correct_email.is_ok());
-    assert!(incorrect_email.is_err());
+    let email1 = Email::build("john", "example.com").expect("Error creating a email");
+    
+    let email2 = Email::from_str("john@example.com").expect("Error with string email");
+
+    assert_eq!(&email1, &email2);
+
+    assert_eq!(email2.username(), "john");
+    assert_eq!(email2.domain(), "example.com");
 }
 ```
 
-## Safe Password Type
+## Password data type
 
 The type `Password` differentiates the raw password from encrypted passwords and provides only the correct methods for each. 
 
@@ -25,10 +29,10 @@ use email_pass::Password;
 fn main() -> Result<(), Error> {
     let encrypt_password = Password::new("ThisIsAPassPhrase.And.Secure.Password")
         .check()? // raw password method
-        .to_encrypt()?; // raw password method
+        .to_encrypt_default()?; // raw password method
     
     // encrypted passwords implements the Deref trait
-    let password = Password::from_encrypt(&encrypt_password)?;
+    let password = Password::from_encrypt(encrypt_password.as_str())?;
     
     println!("{}", password);
 
@@ -44,11 +48,15 @@ fn main() {
     println!("{:?}", &password); // ❌ 
 }
 ```
-## Legacy Safe Passwords Constructor
-*WARNING: This type is until available in [password/legacy.rs](./src/password/legacy.rs). The feature `legacy` only modifies the access of type*.
+## Legacy Password and Email types
+You can use the old types behind the `legacy` feature.
+```toml
+email_pass = { version = "0.7.0", features = ["legacy"] }
+```
 
+### Password
 ```rust
-use email_pass::password::legacy::Password;
+use email_pass::Password;
 fn main() {
     let unsafe_password = Password::new("01234".to_string());
     let safe_password = Password::new(
@@ -67,18 +75,30 @@ fn main() {
     let mut password = Password::from_raw(
         "ThisIsAPassPhrase.And.Secure.Password".to_string(),
     );
-    assert_eq!(password.try_to_str(), Err(Error::InexistentEncryptPassword));
+    assert!(password.try_to_str().is_err());
 
-    password.encrypt_password().unwrap();
+    password.encrypt_password().expect("Error encrypting password");
     assert!(password.try_to_str().is_ok());
 }
 ```
+
 The `Password` type implements the `Debug` trait securely.
 ```rust
 fn main(){
     let safe_password = Password::from_raw("ThisIsAPassPhrase.And.Secure.Password".to_string());
     let str_password = format!("{:?}", &safe_password);
     assert!(!str_password.contains("ThisIs"))
+}
+```
+
+### Email
+You can construct the `Email` with the `new` method.
+```rust
+fn main(){
+    let correct_email = Email::new("example@example.com");
+    let incorrect_email = Email::new("example.com");
+    assert!(correct_email.is_ok());
+    assert!(incorrect_email.is_err());
 }
 ```
 
@@ -93,7 +113,7 @@ email_pass = { version = "0.7.0", features = ["serde"] }
 
 
 
-## Migration from version 0.4.1 to version 0.5.0+
+## Migration from version 0.4.1 to version <= 0.7.0
 
 If you don't want break your code, just use the feature `legacy`:
 ```toml
@@ -104,6 +124,16 @@ Then, you can try the new Password type with the import:
 ```rust
 use email_pass::password::safe::Password;
 ```
+
+## Migration from version 0.4.1 to version 0.8.0+
+Your code must have been broken when upgrading, because the v0.8.0 
+uses a new errors API. In most cases, it is sufficient to adapt your error types to migrate to the new version.
+Additionally, replace all uses of `Deref` trait with `Password` type.
+
+## Migration from version 0.7.0 to version 0.8.0+
+Same case as [above](#migration-from-version-041-to-version-080), just 
+adapt your error types, and replace all uses of `Deref` trait with `Password` type. But if you use have been using both `safe` and `legacy` password types, your code will continuing broken.
+
 
 ## Acknowledgments
 

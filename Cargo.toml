@@ -1,6 +1,6 @@
 [package]
 name = "email_pass"
-version = "0.7.0"
+version = "0.8.0"
 edition = "2021"
 authors = ["johnteper <git@johnteper.me>"]
 description = "Email and Password Type in Rust"
@@ -14,6 +14,9 @@ bcrypt = "0.15.0"
 regex = "1.7.0"
 zxcvbn = "2.2.1"
 serde = { version = "1", optional = true }
+once_cell = "1.18.0"
+thiserror = "1.0.50"
+
 
 [dev-dependencies]
 serde_json = { version = "1" }

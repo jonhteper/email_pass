@@ -1,6 +1,7 @@
-use crate::errors::Error;
 use bcrypt::{hash, verify, DEFAULT_COST};
 use std::fmt::{Debug, Formatter};
+
+use crate::errors::PasswordError;
 
 #[derive(Clone, PartialEq, Eq)]
 pub struct Password {
@@ -10,7 +11,7 @@ pub struct Password {
 
 impl Password {
     /// Create a password and encrypt this password.
-    pub fn new(raw_password: String) -> Result<Self, Error> {
+    pub fn new(raw_password: String) -> Result<Self, PasswordError> {
         let mut password = Self {
             raw: Some(raw_password),
             encrypt: None,
@@ -38,36 +39,38 @@ impl Password {
     }
 
     /// Encrypts a non encrypted password
-    pub fn encrypt_password(&mut self) -> Result<(), Error> {
-        let raw_len_err = Error::PasswordLength;
-
+    pub fn encrypt_password(&mut self) -> Result<(), PasswordError> {
         if self.raw.is_none() {
-            return Err(raw_len_err);
+            Err(PasswordError::InvalidLength(8))?
         }
 
         let raw_password: &str = self.raw.as_ref().unwrap().as_ref();
         if raw_password.len() < 8 {
-            return Err(raw_len_err);
+            Err(PasswordError::InvalidLength(8))?
         }
 
         let estimate = zxcvbn::zxcvbn(raw_password, &[])?;
         if estimate.score() < 4 {
-            return Err(Error::UnsafePassword);
+            return Err(PasswordError::NotEnoughStrongPassword);
         }
-        let encrypt_password = hash(raw_password, DEFAULT_COST + 1)?;
+
+        let encrypt_password =
+            hash(raw_password, DEFAULT_COST + 1).map_err(|_| PasswordError::PasswordEncryption)?;
         self.encrypt = Some(encrypt_password);
 
         Ok(())
     }
 
     /// Verify an encrypt password from non encrypt string
-    pub fn check(&self, raw_password: String) -> Result<(), Error> {
+    pub fn check(&self, raw_password: String) -> Result<(), PasswordError> {
         if self.encrypt.is_none() {
-            return Err(Error::InexistentEncryptPassword);
+            return Err(PasswordError::PasswordNotEncrypted);
         }
 
-        if !verify(raw_password, self.encrypt.as_ref().unwrap().as_ref())? {
-            return Err(Error::WrongPassword);
+        if !verify(raw_password, self.encrypt.as_ref().unwrap().as_ref())
+            .map_err(|_| PasswordError::PasswordVerification)?
+        {
+            Err(PasswordError::WrongPassword)?
         }
 
         Ok(())
@@ -78,26 +81,28 @@ impl Password {
         self.encrypt.as_ref().map(|password| password.to_string())
     }
 
-    /// Returns a ref of the encrypt password, if exists, otherwise returns [`Error::InexistentEncryptPassword`].
-    pub fn try_to_str(&self) -> Result<&String, Error> {
+    /// Returns a ref of the encrypt password, if exists, otherwise returns [`PasswordError::PasswordNotEncrypted`].
+    pub fn try_to_str(&self) -> Result<&String, PasswordError> {
         self.encrypt
             .as_ref()
-            .ok_or(Error::InexistentEncryptPassword)
+            .ok_or(PasswordError::PasswordNotEncrypted)
     }
 
-    /// Returns the encrypt password, if exists, otherwise returns [`Error::InexistentEncryptPassword`].
+    /// Returns the encrypt password, if exists, otherwise returns [`PasswordError::PasswordNotEncrypted`].
     ///
     /// **WARNING**: this method cloned the internal value
-    pub fn try_to_string(&self) -> Result<String, Error> {
-        self.encrypt.clone().ok_or(Error::InexistentEncryptPassword)
+    pub fn try_to_string(&self) -> Result<String, PasswordError> {
+        self.encrypt
+            .clone()
+            .ok_or(PasswordError::PasswordNotEncrypted)
     }
 }
 
 impl TryInto<String> for Password {
-    type Error = Error;
+    type Error = PasswordError;
 
     fn try_into(self) -> Result<String, Self::Error> {
-        self.encrypt.ok_or(Error::InexistentEncryptPassword)
+        self.encrypt.ok_or(PasswordError::PasswordNotEncrypted)
     }
 }
 
