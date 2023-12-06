@@ -1,4 +1,4 @@
-mod errors;
+pub mod errors;
 
 #[cfg(feature = "legacy")]
 mod legacy;
@@ -15,3 +15,5 @@ pub use typed::{
     password::{Encrypt, Password, Raw},
     password_checker::{PasswordStrength, PasswordStrengthChecker},
 };
+
+pub use errors::{EmailError, PasswordError};
