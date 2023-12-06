@@ -126,13 +126,16 @@ use email_pass::password::safe::Password;
 ```
 
 ## Migration from version 0.4.1 to version 0.8.0+
-Your code must have been broken when upgrading, because the v0.8.0 
-uses a new errors API. In most cases, it is sufficient to adapt your error types to migrate to the new version.
-Additionally, replace all uses of `Deref` trait with `Password` type.
+Your code must have been broken when upgrading, because the `v0.8.0` 
+uses a new errors API, and uses a new Email constructors.
+To fix your code: 
+* Adapt your error types to migrate to the new version.
+* Replace all uses of `Deref` trait with `Password` type.
+* Replace all uses of `Email::new` method with `Email::build` or `Email::from_str`.
+
 
 ## Migration from version 0.7.0 to version 0.8.0+
-Same case as [above](#migration-from-version-041-to-version-080), just 
-adapt your error types, and replace all uses of `Deref` trait with `Password` type. But if you use have been using both `safe` and `legacy` password types, your code will continuing broken.
+Same case as [above](#migration-from-version-041-to-version-080). But if you use have been using both `safe` and `legacy` password types, you should choose only one.
 
 
 ## Acknowledgments
