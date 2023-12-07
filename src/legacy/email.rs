@@ -21,12 +21,12 @@ pub struct Email(String);
 
 impl Email {
     pub fn new(email: &str) -> Result<Self, EmailError> {
-        if email.len() < 6 || email.len() > 254 {
-            return Err(EmailError::InvalidLength);
+        if !(6..=254).contains(&email.len()) {
+            return Err(EmailError::Length);
         }
 
         if !EMAIL_REGEX.is_match(email) {
-            return Err(EmailError::InvalidFormat);
+            return Err(EmailError::Format);
         }
 
         Ok(Self(email.to_string()))
