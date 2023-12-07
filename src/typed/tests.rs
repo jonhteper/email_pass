@@ -4,9 +4,7 @@ use std::str::FromStr;
 
 use bcrypt::{BcryptError, DEFAULT_COST};
 
-use crate::{Email, Password};
-
-use super::password::Encrypt;
+use crate::{Email, Encrypt, Password};
 
 const SECURE_PASSWORD_VALUE: &str = "ThisIsAPassPhrase.And.Secure.Password";
 
@@ -87,4 +85,101 @@ fn typed_email_constructor_works() {
 
     assert_eq!(&email, &new_email);
     assert_eq!(email.to_string().as_str(), str_email);
+}
+
+#[cfg(feature = "serde")]
+mod serde_tests {
+    use crate::{Email, Password, Raw};
+    use serde::{Deserialize, Serialize};
+    use serde_json::json;
+    use std::str::FromStr;
+
+    const GENERIC_HASH: &'static str = "$2b$04$teRReyH3sVfCd8JA71Sm6xekdy6KhRIzYYERUEUC";
+    #[derive(Serialize, Deserialize, Debug, PartialEq)]
+    struct User {
+        pub email: Email,
+        pub password: Password,
+    }
+
+    #[test]
+    fn serialize_works() {
+        let user = User {
+            email: Email::from_str("mail@mail.com").unwrap(),
+            password: Password::from_encrypt(GENERIC_HASH).unwrap(),
+        };
+
+        let result = serde_json::to_string(&user);
+        assert!(result.is_ok());
+        println!("{:?}", result.unwrap());
+    }
+
+    #[test]
+    fn deserialize_works() {
+        let user_json = json!({
+            "email": "mail@mail.com",
+            "password": GENERIC_HASH,
+        });
+
+        let user = User {
+            email: Email::from_str("mail@mail.com").unwrap(),
+            password: Password::from_encrypt(GENERIC_HASH).unwrap(),
+        };
+
+        let deserialize_user = serde_json::from_value::<User>(user_json).unwrap();
+
+        assert_eq!(&deserialize_user, &user);
+        println!("{:?}", &deserialize_user);
+    }
+
+    #[test]
+    fn deserialize_fails_correctly() {
+        let bad_values = [
+            json!({
+                "email": "mail.com",
+                "password": GENERIC_HASH,
+            }),
+            json!({
+                "email": "mail@mail.com",
+                "password": "0123456789",
+            }),
+        ];
+
+        for value in bad_values {
+            serde_json::from_value::<User>(value).expect_err("deserialize must fail");
+        }
+    }
+
+    #[derive(Deserialize, PartialEq)]
+    struct UserRequest {
+        pub name: String,
+        pub password: Password<Raw>,
+    }
+
+    #[test]
+    fn deserialize_raw_works<'a>() {
+        let user_json = json!({
+            "name": "John Doe",
+            "password": "0123456789"
+        });
+
+        let user = UserRequest {
+            name: "John Doe".to_string(),
+            password: Password::new("0123456789"),
+        };
+
+        let deserialize_user = serde_json::from_value::<UserRequest>(user_json).unwrap();
+
+        assert!(deserialize_user == user);
+    }
+
+    #[test]
+    fn deserialize_raw_fails_correctly() {
+        let bad_input = json!({
+            "name": "John Doe",
+            "password": ""
+        });
+
+        let result = serde_json::from_value::<UserRequest>(bad_input);
+        assert!(result.is_err())
+    }
 }
