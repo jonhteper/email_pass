@@ -12,9 +12,9 @@ pub const HASHED_PASSWORD_REGEX_VALUE: &str = r"^\$([a-z\d]+)\$([a-z\d]+)\$.*";
 static HASHED_PASSWORD_REGEX: Lazy<Regex> =
     Lazy::new(|| Regex::new(HASHED_PASSWORD_REGEX_VALUE).unwrap());
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Eq, PartialEq)]
 pub struct Raw;
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Eq, PartialEq)]
 pub struct Encrypt;
 
 /// Safe-access password abstraction.

@@ -35,7 +35,7 @@ fn create_password(password: &str) -> Password {
         .expect("error encripting password")
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 struct User<'a> {
     id: &'a str,
     password: Password<Encrypt>,
