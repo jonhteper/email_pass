@@ -20,7 +20,7 @@ pub enum EmailError {
     Username,
 }
 
-#[derive(Debug, Error, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, Error, PartialEq, Eq)]
 pub enum PasswordError {
     #[error("invalid password length, use a value with at least {0} characters")]
     InvalidLength(u8),
