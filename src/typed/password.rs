@@ -54,6 +54,10 @@ impl Password {
         verify(raw_password, &self.value)
     }
 
+    pub fn verify_from_raw<R: AsRef<str>>(&self, raw: R) -> Result<bool, BcryptError> {
+        verify(raw.as_ref(), &self.value)
+    }
+
     /// Extracts the inner value from [`Password<Encrypt>`].
     pub fn as_str(&self) -> &str {
         &self.value
@@ -139,6 +143,12 @@ impl Display for Password<Encrypt> {
 }
 
 impl AsRef<str> for Password<Encrypt> {
+    fn as_ref(&self) -> &str {
+        &self.value
+    }
+}
+
+impl AsRef<str> for Password<Raw> {
     fn as_ref(&self) -> &str {
         &self.value
     }
