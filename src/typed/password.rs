@@ -123,6 +123,15 @@ impl Password<Raw> {
     }
 }
 
+impl From<Arc<str>> for Password<Raw> {
+    fn from(value: Arc<str>) -> Self {
+        Password {
+            value,
+            state: PhantomData,
+        }
+    }
+}
+
 impl Display for Password<Encrypt> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         Display::fmt(&self.value, f)
