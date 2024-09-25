@@ -71,7 +71,8 @@ fn password_hash_works() {
         .unwrap()
         .to_encrypt(DEFAULT_COST)
         .unwrap();
-    assert!(encrypt_password.verify(&raw_password).unwrap())
+    assert!(encrypt_password.verify(&raw_password).unwrap());
+    assert!(encrypt_password.verify_from_raw(&raw_password).unwrap());
 }
 
 #[test]
