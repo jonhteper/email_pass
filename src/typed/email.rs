@@ -20,7 +20,7 @@ static EMAIL_USERNAME_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"([a-zA-Z0-9
 static EMAIL_DOMAIN_REGEX: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"([a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)").unwrap());
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Ord, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(try_from = "String"))]
 #[cfg_attr(feature = "serde", serde(into = "String"))]
